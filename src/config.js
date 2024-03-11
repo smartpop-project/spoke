@@ -60,6 +60,9 @@ import SharedScreenNodeEditor from "./ui/properties/SharedScreenNodeEditor";
 import MediaFrameNode from "./editor/nodes/MediaFrameNode";
 import MediaFrameNodeEditor from "./ui/properties/MediaFrameNodeEditor";
 
+import EmptyFrameNode from "./editor/nodes/EmptyFrameNode";
+import EmptyFrameNodeEditor from "./ui/properties/EmptyFrameNodeEditor";
+
 import SketchfabSource from "./ui/assets/sources/SketchfabSource";
 import BingImagesSource from "./ui/assets/sources/BingImagesSource";
 import BingVideosSource from "./ui/assets/sources/BingVideosSource";
@@ -102,6 +105,7 @@ export function createEditor(api, settings) {
   editor.registerNode(SimpleWaterNode, SimpleWaterNodeEditor);
   editor.registerNode(ScenePreviewCameraNode, ScenePreviewCameraNodeEditor);
   editor.registerNode(MediaFrameNode, MediaFrameNodeEditor);
+  editor.registerNode(EmptyFrameNode, EmptyFrameNodeEditor);
   editor.registerNode(AudioZoneNode, AudioZoneNodeEditor);
   editor.registerNode(TroikaTextNode, TroikaTextNodeEditor);
   editor.registerNode(MirrorNode, MirrorNodeEditor);
