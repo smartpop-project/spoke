@@ -465,7 +465,7 @@ export default class Project extends EventEmitter {
       throw new Error("Save project aborted");
     }
 
-    const serializedScene = scene.serialize();
+    const serializedScene = await this.replaceResourceUrl(scene.serialize());
     const projectBlob = new Blob([JSON.stringify(serializedScene)], { type: "application/json" });
     const {
       file_id: project_file_id,
@@ -561,6 +561,64 @@ export default class Project extends EventEmitter {
     return true;
   }
 
+  async replaceResourceUrl(projectBody) {
+    const entities = projectBody.entities
+
+    for (let key in entities) {
+      for (let component of entities[key].components) {
+        if (component.props.hasOwnProperty('src')) {
+          const uploadRequired = !component.props.src.includes(window.eventCallback)
+
+          if (uploadRequired) {
+            const file = await this.download(component.props.src)
+            const fileName = component.props.src.split('/').pop()
+            const uploadedUrl = await this.uploadToXrcloud(file, fileName)
+
+            component.props.src = uploadedUrl
+          }
+        }
+      }
+    }
+
+    return projectBody
+  }
+
+  async uploadToXrcloud(file, filename) {
+    return await new Promise((resolve, reject) => {
+      const request = new XMLHttpRequest();
+      request.open("post", `${window.eventCallback}/assets`, true);
+
+      request.addEventListener("error", error => {
+        reject(new RethrownError("Upload failed", error));
+      });
+
+      request.addEventListener("load", () => {
+
+        if (request.status < 300) {
+          const response = JSON.parse(request.responseText);
+          resolve(response.fileUrl);
+        } else {
+          reject(new Error(`Upload failed ${request.statusText}`));
+        }
+      });
+
+      const formData = new FormData();
+      const extension = filename.split('.').pop();
+      const mimetype = CommonKnownContentTypes[extension]
+      const blob = new Blob([file], { type: mimetype ? mimetype : 'application/octet-stream' })
+      formData.set("file", blob, filename);
+
+      request.send(formData);
+    })
+  }
+
+  async download(url) {
+    const newUrl = proxiedUrlFor(url)
+    const response = await fetch(newUrl);
+
+    return await response.arrayBuffer();
+  }
+
   async saveProject(projectId, editor, signal, showDialog, hideDialog) {
     this.emit("project-saving");
 
@@ -592,7 +650,7 @@ export default class Project extends EventEmitter {
       throw new Error("Save project aborted");
     }
 
-    const serializedScene = editor.scene.serialize();
+    const serializedScene = await this.replaceResourceUrl(editor.scene.serialize());
     const projectBlob = new Blob([JSON.stringify(serializedScene)], { type: "application/json" });
     const {
       file_id: project_file_id,
@@ -826,7 +884,7 @@ export default class Project extends EventEmitter {
       }
 
       // Serialize Spoke scene
-      const serializedScene = editor.scene.serialize();
+      const serializedScene = await this.replaceResourceUrl(editor.scene.serialize());
       const sceneBlob = new Blob([JSON.stringify(serializedScene)], { type: "application/json" });
 
       showDialog(ProgressDialog, {
@@ -961,7 +1019,7 @@ export default class Project extends EventEmitter {
        * 유저가 프로젝트 생성일 경우와 씬 수정일 경우를 구분해
        * 각 API를 호출함
        */
-      if(window.isCreatingProject){
+      if (window.isCreatingProject) {
         await fetch(`${window.eventCallback}/events/spoke`, {
           method: "POST",
           headers: {
@@ -1000,7 +1058,7 @@ export default class Project extends EventEmitter {
            * belivvr custom
            * classV return URL 로 보냄
            */
-          if(window.classV) window.location.href=window.classV;
+          if (window.classV) window.location.href = window.classV;
         }
       });
     } finally {
@@ -1166,10 +1224,10 @@ export default class Project extends EventEmitter {
   async _uploadAsset(endpoint, editor, file, onProgress, signal) {
     let thumbnail_file_id = null;
     let thumbnail_access_token = null;
-    
+
     if (!matchesFileTypes(file, AudioFileTypes)) {
       const thumbnailBlob = await editor.generateFileThumbnail(file);
-      
+
       const response = await this.upload(thumbnailBlob, undefined, signal);
 
 
@@ -1207,27 +1265,36 @@ export default class Project extends EventEmitter {
 
     const resp = await this.fetch(endpoint, { method: "POST", headers, body, signal });
 
-    const formData = new FormData();
-    formData.set("file", file)
-    const data = await this.fetch(`${window.eventCallback}/assets`, {method: "POST", body: formData})
-    const { fileUrl } = await data.json();
+    try {
 
-    const json = await resp.json();
+      // const formData = new FormData();
+      // formData.set("file", file)
+      // console.log('upload', formData)
+      // const data = await this.fetch(`${window.eventCallback}/assets`, { method: "POST", body: formData })
+      // console.log('upload complete', data)
 
-    const asset = json.assets[0];
+      // const fileData = await data.json();
+      // const { fileUrl } = fileData
 
-    this.lastUploadAssetRequest = Date.now();
+      const json = await resp.json();
 
-    return {
-      id: asset.asset_id,
-      name: asset.name,
-      url: fileUrl,
-      type: asset.type,
-      attributions: {},
-      images: {
-        preview: { url: asset.thumbnail_url }
-      }
-    };
+      const asset = json.assets[0];
+
+      this.lastUploadAssetRequest = Date.now();
+
+      return {
+        id: asset.asset_id,
+        name: asset.name,
+        url: fileUrl,
+        type: asset.type,
+        attributions: {},
+        images: {
+          preview: { url: asset.thumbnail_url }
+        }
+      };
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   async deleteAsset(assetId) {
