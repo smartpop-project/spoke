@@ -567,6 +567,9 @@ export default class Project extends EventEmitter {
     for (let key in entities) {
       for (let component of entities[key].components) {
         if (component.props.hasOwnProperty('src')) {
+          if (component.props.src.includes("vimeo.com")) continue
+          if (component.props.src.includes("youtube.com")) continue
+
           const uploadRequired = !component.props.src.includes(window.eventCallback)
 
           if (uploadRequired) {
