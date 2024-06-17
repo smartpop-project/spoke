@@ -564,25 +564,28 @@ export default class Project extends EventEmitter {
   async replaceResourceUrl(projectBody) {
     const entities = projectBody.entities
 
-    for (let key in entities) {
-      for (let component of entities[key].components) {
-        if (component.props.hasOwnProperty('src')) {
-          if (component.props.src.includes("vimeo.com")) continue
-          if (component.props.src.includes("youtube.com")) continue
+    // fstory97 (24.06.18) This function was originally intended to upload all Spoke files to our server to replace the reticulum.io server of Mozilla Hub on May 31, 2024. However, it is currently causing slow deployment, so the code that uploads all files will be removed.
+    if (false)
+    {
+      for (let key in entities) {
+        for (let component of entities[key].components) {
+          if (component.props.hasOwnProperty('src')) {
+            if (component.props.src.includes("vimeo.com")) continue
+            if (component.props.src.includes("youtube.com")) continue
 
-          const uploadRequired = !component.props.src.includes(window.eventCallback)
+            const uploadRequired = !component.props.src.includes(window.eventCallback)
 
-          if (uploadRequired) {
-            const file = await this.download(component.props.src)
-            const fileName = component.props.src.split('/').pop()
-            const uploadedUrl = await this.uploadToXrcloud(file, fileName)
+            if (uploadRequired) {
+              const file = await this.download(component.props.src)
+              const fileName = component.props.src.split('/').pop()
+              const uploadedUrl = await this.uploadToXrcloud(file, fileName)
 
-            component.props.src = uploadedUrl
+              component.props.src = uploadedUrl
+            }
           }
         }
       }
     }
-
     return projectBody
   }
 

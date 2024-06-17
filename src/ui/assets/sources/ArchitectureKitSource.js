@@ -5,7 +5,7 @@ export default class ArchitectureKitSource extends KitSource {
   constructor(api) {
     super(
       api,
-      "https://belivvr.github.io/files/xrcloud/spoke/ArchKit-belivvr-backup.gltf"
+      "https://belivvr.github.io/files/xrcloud/spoke/ArchKit/ArchKit-4127950833cadf21d6b6dec45b402639a0467e3a.gltf"
     );
     this.id = "architecture-kit";
     this.name = "Architecture Kit";
