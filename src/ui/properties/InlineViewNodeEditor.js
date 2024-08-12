@@ -11,10 +11,13 @@ import useSetPropertySelected from "./useSetPropertySelected";
 
 export const options = {
   main: "Main",
-  sideView: "Side view"
+  sideView: "Side view",
+  selfWindow: "Self window",
+  newWindow: "New window"
 };
 
-const frameOptions = Object.values(options).map(v => ({ label: v, value: v }));
+const frameOptions = Object.entries(options).map(([value, label]) => ({ label, value }));
+
 
 export default function InlineViewNodeEditor(props) {
   const { editor, node } = props;

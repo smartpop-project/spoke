@@ -141,21 +141,30 @@ export default class InlineViewNode extends EditorNodeMixin(Image) {
     super.prepareForExport();
     this.remove(this.helper);
 
+
+    const convertedFrameOption = this.frameOption === "main"
+    ? "main"
+    : this.frameOption === "sideView"
+    ? "sideView"
+    : this.frameOption === "newWindow"
+    ? "newWindow"
+    : "selfWindow";
+  
     this.addGLTFComponent("inline-frame", {
       name: this.name,
       src: this.inlineURL,
-      frameOption: this.frameOption === "Main" ? "main" : "sideView",
+      frameOption:convertedFrameOption,
       imageURL: this.src
     });
-
+  
     if (this.billboard) {
       this.addGLTFComponent("billboard", {});
     }
-
+  
     this.addGLTFComponent("networked", {
       id: this.uuid
     });
-
+  
     this.replaceObject();
   }
 
