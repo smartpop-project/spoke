@@ -20,8 +20,5 @@ jobs:
       - name: Install deps
         run: yarn install
 
-      - name: Install deps
-        run: yarn upgrade
-
       - name: Build
         run: yarn build
