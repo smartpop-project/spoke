@@ -17,8 +17,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Install deps
-        run: yarn install
+      #- name: Install deps
+      #  run: yarn install
 
       - name: Build
         run: npm run build
