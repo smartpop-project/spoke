@@ -62,11 +62,16 @@ export const proxiedUrlFor = url => {
     return url;
   }
 
-  return `https://${configs.CORS_PROXY_SERVER}/${url}`;
+  if (configs.CORS_PROXY_SERVER) {
+    return `https://${configs.CORS_PROXY_SERVER}/${url}`;
+  } else {
+    return url;
+  }
 };
 
 export const scaledThumbnailUrlFor = (url, width, height) => {
-  if (configs.RETICULUM_SERVER.includes("hubs.local") && url.includes("hubs.local")) {
+  //if (configs.RETICULUM_SERVER.includes("hubs.local") && url.includes("hubs.local")) {
+  if (configs.RETICULUM_SERVER) {
     return url;
   }
 
@@ -565,8 +570,7 @@ export default class Project extends EventEmitter {
     const entities = projectBody.entities
 
     // fstory97 (24.06.18) This function was originally intended to upload all Spoke files to our server to replace the reticulum.io server of Mozilla Hub on May 31, 2024. However, it is currently causing slow deployment, so the code that uploads all files will be removed.
-    if (false)
-    {
+    if (false) {
       for (let key in entities) {
         for (let component of entities[key].components) {
           if (component.props.hasOwnProperty('src')) {
