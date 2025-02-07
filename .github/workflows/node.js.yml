@@ -27,5 +27,5 @@ jobs:
       - name: copy
         run: cp waternormals.jpg node_modules/three/examples/textures
 
-      - name: Build
-        run: npm run build
+      #- name: Build
+      #  run: npm run build
